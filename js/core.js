@@ -1,4 +1,4 @@
-// Knobelfeld – Spielkern: Varianten, Generator und logischer Löser.
+// DeinSweeper – Spielkern: Varianten, Generator und logischer Löser.
 // Kein DOM-Zugriff, damit der Code im Web Worker und in Node-Tests läuft.
 //
 // Jedes Feld hat einen Wert: 0 = sicher, 1/2 = Mine (Bedeutung je nach Modus).

@@ -1,4 +1,4 @@
-// Knobelfeld – Weltrangliste als Cloudflare Worker mit D1-Datenbank.
+// DeinSweeper – Weltrangliste als Cloudflare Worker mit D1-Datenbank.
 //
 // Ablauf einer Runde:
 //   POST /api/start  { mode, diff }                     -> { id, seed }

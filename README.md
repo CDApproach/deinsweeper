@@ -1,4 +1,4 @@
-# Knobelfeld
+# DeinSweeper
 
 Ein Logikspiel für das Smartphone im Stil von Minesweeper, mit vier eigenen Varianten.
 **Jedes Spielfeld ist garantiert ohne Raten lösbar.**
@@ -37,7 +37,7 @@ Das startet das Spiel **mit einer lokalen Test-Weltrangliste** unter `http://loc
 
 ## Weltrangliste (Cloudflare Worker + D1)
 
-Die gemeinsame Bestenliste läuft als **eigener** Worker namens `knobelfeld-api`. Andere Worker in deinem Cloudflare-Konto bleiben davon unberührt. Der kostenlose Tarif reicht locker: Eine Prüfung braucht weniger als 1 ms Rechenzeit.
+Die gemeinsame Bestenliste läuft als **eigener** Worker namens `knobelfeld-api` (der technische Name stammt noch aus der Entwicklung, für Spielerinnen und Spieler ist er unsichtbar). Andere Worker in deinem Cloudflare-Konto bleiben davon unberührt. Der kostenlose Tarif reicht locker: Eine Prüfung braucht weniger als 1 ms Rechenzeit.
 
 **So schützt der Server vor Schummeln:** Der Browser schickt keine Punktzahl, sondern seine Züge. Der Server baut das Feld aus seinem eigenen Zufallswert nach, spielt die Züge nach und wertet nur echte Siege. Die Zeit misst er mit seiner eigenen Uhr, die Punkte rechnet er selbst aus. Jede Runde zählt nur einmal.
 
@@ -75,7 +75,7 @@ npx wrangler d1 execute knobelfeld --remote --command "UPDATE games SET name = N
    ```bash
    git init
    git add .
-   git commit -m "Knobelfeld"
+   git commit -m "DeinSweeper"
    git branch -M main
    git remote add origin git@github.com:cdapproach/deinsweeper.git
    git push -u origin main
@@ -85,7 +85,7 @@ npx wrangler d1 execute knobelfeld --remote --command "UPDATE games SET name = N
 
 Auf dem Handy die Seite öffnen und **„Zum Home-Bildschirm“** wählen. Danach startet das Spiel wie eine App, ohne Browserleiste.
 
-**Nach Änderungen:** In `sw.js` die `VERSION` erhöhen (z. B. von `knobelfeld-v2` auf `knobelfeld-v3`), damit installierte Apps die neue Version laden.
+**Nach Änderungen:** In `sw.js` die `VERSION` erhöhen (z. B. von `deinsweeper-v4` auf `deinsweeper-v5`), damit installierte Apps die neue Version laden.
 
 ## Dateien
 

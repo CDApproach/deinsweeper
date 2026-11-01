@@ -40,4 +40,4 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end('not found');
   }
-}).listen(port, () => console.log(`Knobelfeld mit lokaler Weltrangliste: http://localhost:${port}`));
+}).listen(port, () => console.log(`DeinSweeper mit lokaler Weltrangliste: http://localhost:${port}`));

@@ -1,6 +1,6 @@
 {
-  "name": "Knobelfeld",
-  "short_name": "Knobelfeld",
+  "name": "DeinSweeper",
+  "short_name": "DeinSweeper",
   "description": "Vier Logik-Varianten im Stil von Minesweeper – jedes Feld ist ohne Raten lösbar.",
   "lang": "de",
   "start_url": "./",

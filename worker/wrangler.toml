@@ -1,4 +1,4 @@
-# Eigener Worker nur für Knobelfeld – andere Worker im Konto bleiben unberührt.
+# Eigener Worker nur für DeinSweeper – andere Worker im Konto bleiben unberührt.
 name = "knobelfeld-api"
 main = "src/index.js"
 compatibility_date = "2025-06-01"

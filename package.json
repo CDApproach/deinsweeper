@@ -1,2 +1,2 @@
-{ "name": "knobelfeld", "private": true, "type": "module", "scripts": { "test": "node test/check.mjs && node test/api.mjs",
+{ "name": "deinsweeper", "private": true, "type": "module", "scripts": { "test": "node test/check.mjs && node test/api.mjs",
     "dev": "node worker/dev.mjs" } }

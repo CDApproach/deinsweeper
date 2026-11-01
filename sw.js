@@ -1,6 +1,6 @@
 // Offline-Cache. Bei Änderungen an den Dateien VERSION erhöhen,
 // damit installierte Apps die neue Version laden.
-const VERSION = 'knobelfeld-v3';
+const VERSION = 'deinsweeper-v4';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/main.js', 'js/core.js', 'js/config.js', 'js/online.js', 'js/worker.js', 'js/audio.js', 'js/fx.js', 'js/icons.js',
