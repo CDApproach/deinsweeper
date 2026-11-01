@@ -1,0 +1,16 @@
+# Eigener Worker nur für Knobelfeld – andere Worker im Konto bleiben unberührt.
+name = "knobelfeld-api"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+# Komma-getrennt: Adressen, von denen das Spiel aufgerufen werden darf.
+# Nach dem Hochladen auf GitHub Pages deine Adresse ergänzen, z. B.
+# "https://deinname.github.io,http://localhost:8642"
+ALLOWED_ORIGINS = "https://cdapproach.github.io,http://localhost:8642"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "knobelfeld"
+# Von `npx wrangler d1 create knobelfeld` ausgegeben
+database_id = "0aea77bd-65ab-476f-b565-2df4b1f2ede8"
