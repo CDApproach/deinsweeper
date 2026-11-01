@@ -85,7 +85,7 @@ npx wrangler d1 execute knobelfeld --remote --command "UPDATE games SET name = N
 
 Auf dem Handy die Seite öffnen und **„Zum Home-Bildschirm“** wählen. Danach startet das Spiel wie eine App, ohne Browserleiste.
 
-**Nach Änderungen:** In `sw.js` die `VERSION` erhöhen (z. B. von `deinsweeper-v4` auf `deinsweeper-v5`), damit installierte Apps die neue Version laden.
+**Nach Änderungen:** In `sw.js` die `VERSION` erhöhen (z. B. von `deinsweeper-v5` auf `deinsweeper-v6`), damit installierte Apps die neue Version laden. Wer Name oder Symbol in `manifest.webmanifest` ändert, sollte außerdem in `index.html` und `sw.js` die Zahl hinter `manifest.webmanifest?v=` erhöhen. Sonst zeigen Handys beim Installieren noch die alten Angaben.
 
 ## Dateien
 
