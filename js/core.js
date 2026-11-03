@@ -548,7 +548,7 @@ export function replay(b, moves) {
   if (!Array.isArray(moves) || !moves.length || moves.length > 4000) throw new Error('moves');
   const mode = MODES[b.mode];
   const revealed = new Uint8Array(b.n), flags = new Uint8Array(b.n);
-  const flagValues = mode.values === 3 ? [0, 1, 2] : [0, 1];
+  const flagValues = mode.values === 3 ? [0, 1, 2, FLAG_ANY] : [0, 1];
   const events = [];
   let lastT = 0;
   const cellOk = (i) => Number.isInteger(i) && i >= 0 && i < b.n;
@@ -617,18 +617,39 @@ export function cascade(b, revealed, start) {
 }
 
 // Felder, die durch Tippen auf eine erfüllte Zahl aufgedeckt werden dürfen.
+// Markierung "Mine, Sorte offen" (?) – in Modi mit zwei Minensorten.
+export const FLAG_ANY = 3;
+
+// Kleinster und größter Beitrag einer Markierung zu einer Zahl.
+// Bei "?" ist die Sorte offen, also zählt die ganze Spanne.
+export function flagRange(c, f) {
+  if (f !== FLAG_ANY) return [c.w[f], c.w[f]];
+  const mines = c.w.slice(1);
+  return [Math.min(...mines), Math.max(...mines)];
+}
+
+// Summe der Markierungen im Bereich einer Zahl als Spanne [lo, hi] plus offene Felder.
+export function flaggedSum(c, revealed, flags) {
+  let lo = 0, hi = 0;
+  const open = [];
+  for (const cell of c.cells) {
+    if (revealed[cell]) continue;
+    if (flags[cell]) { const [a, z] = flagRange(c, flags[cell]); lo += a; hi += z; }
+    else open.push(cell);
+  }
+  return { lo, hi, open };
+}
+
+// Felder, die durch Tippen auf eine erfüllte Zahl aufgedeckt werden dürfen.
+// Nur wenn die Markierungen die Zahl in JEDEM Fall schon ausschöpfen – auch
+// wenn bei "?"-Markierungen die Sorte noch offen ist. So kann eine noch
+// unbekannte Sorte nie zu einem falschen Aufdecken führen.
 export function chordTargets(b, i, revealed, flags) {
   const out = new Set();
   for (const c of MODES[b.mode].constraints(b, i)) {
     if (!c.pos || !c.show || c.tmin !== c.tmax) continue;
-    let sum = 0;
-    const open = [];
-    for (const cell of c.cells) {
-      if (revealed[cell]) continue;
-      if (flags[cell]) sum += c.w[flags[cell]];
-      else open.push(cell);
-    }
-    if (open.length && sum === c.tmax) open.forEach((x) => out.add(x));
+    const { lo, open } = flaggedSum(c, revealed, flags);
+    if (open.length && lo === c.tmax) open.forEach((x) => out.add(x));
   }
   return [...out];
 }
@@ -653,7 +674,10 @@ export function findHint(b, revealed, flags) {
         hint = { cell: c, kind: flags[c] ? 'wrongflag' : 'safe' };
       } else if (!(m & 1)) {
         if (!flags[c]) hint = { cell: c, kind: 'mine', value: single(m) ? VAL[m] : 0 };
-        else if (single(m) && flags[c] !== VAL[m]) hint = { cell: c, kind: 'retype', value: VAL[m] };
+        else if (flags[c] === FLAG_ANY) {
+          // Sorte jetzt beweisbar – wichtig nur, wo die Sorte zum Sieg gehört (Magnetfeld).
+          if (single(m) && MODES[b.mode].full) hint = { cell: c, kind: 'type', value: VAL[m] };
+        } else if (single(m) && flags[c] !== VAL[m]) hint = { cell: c, kind: 'retype', value: VAL[m] };
       }
       if (hint) {
         // Die ganze Beweiskette zeigen, nicht nur den letzten Schritt.

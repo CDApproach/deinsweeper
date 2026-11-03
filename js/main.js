@@ -1,4 +1,4 @@
-import { MODES, DIFFICULTIES, Engine, generate, cascade, chordTargets, highlightCells, findHint, scoreGame, COMBO_MS } from './core.js';
+import { MODES, DIFFICULTIES, Engine, generate, cascade, chordTargets, highlightCells, findHint, scoreGame, COMBO_MS, FLAG_ANY, flaggedSum } from './core.js';
 import { api, online } from './online.js';
 import { ICON, mineIcon, flagIcon } from './icons.js';
 import { sfx, haptics, audio, unlockAudio } from './audio.js';
@@ -26,13 +26,14 @@ const INFO = {
     name: 'Schwere Minen',
     desc: 'Kleine Minen zählen 1, große 2 – die Zahl ist die Summe.',
     minesLabel: 'Minen',
-    flagCycle: [1, 2],
-    flagHint: 'Mehrfach tippen: kleine Mine (1) → große Mine (2) → keine',
+    flagCycle: [FLAG_ANY, 1, 2],
+    flagHint: 'Mehrfach tippen: Mine mit offener Sorte (?) → kleine Mine (1) → große Mine (2) → keine',
     rules: [
       'Unter den Feldern liegen <b>kleine Minen (Wert 1)</b> und <b>große Minen (Wert 2)</b>.',
       'Jede Zahl ist die <b>Summe der Minen-Werte</b> in den 8 Nachbarfeldern.',
       'Eine 3 kann also 1 + 2 sein – oder 1 + 1 + 1. Erst die Zahlen daneben verraten, was stimmt.',
-      'Gewonnen, wenn alle sicheren Felder offen sind.',
+      'Gewonnen, wenn alle sicheren Felder offen sind. <b>Die Sorte jeder Mine musst du nicht kennen</b> – oft bleibt sie bis zum Schluss offen, und das ist in Ordnung.',
+      'Weißt du, dass irgendwo eine Mine liegt, aber nicht welche Sorte? Markiere sie mit <b>?</b>. Raten musst du nie.',
     ],
     example: {
       cols: 3,
@@ -93,8 +94,8 @@ const INFO = {
     name: 'Magnetfeld',
     desc: 'Zähle die Magnete – die Farbe verrät, welcher Pol überwiegt.',
     minesLabel: 'Magnete',
-    flagCycle: [1, 2],
-    flagHint: 'Mehrfach tippen: Pluspol → Minuspol → keine',
+    flagCycle: [FLAG_ANY, 1, 2],
+    flagHint: 'Mehrfach tippen: Magnet mit offenem Pol (?) → Pluspol → Minuspol → keine',
     rules: [
       'Die Minen sind Magnete: <b style="color:#ff6b7f">Pluspol</b> oder <b style="color:#63b0ff">Minuspol</b>.',
       'Die Zahl zählt die Magnete in den 8 Nachbarfeldern – wie bei Minesweeper.',
@@ -489,14 +490,10 @@ function updateSatisfaction() {
     let done = true, over = false;
     for (const c of G.cons[i]) {
       if (!c.show || !c.pos) continue;
-      let sum = 0, open = 0;
-      for (const j of c.cells) {
-        if (G.revealed[j]) continue;
-        if (G.flags[j]) sum += c.w[G.flags[j]];
-        else open++;
-      }
-      if (sum > c.tmax || (!open && sum !== c.tmax)) over = true;
-      if (open) done = false;
+      // Bei "?"-Markierungen ist die Summe eine Spanne. Rot nur bei echtem Widerspruch.
+      const { lo, hi, open } = flaggedSum(c, G.revealed, G.flags);
+      if (lo > c.tmax || (!open.length && hi < c.tmin)) over = true;
+      if (open.length) done = false;
     }
     const el = G.cells[i];
     el.classList.toggle('done', done && !over);
@@ -764,6 +761,7 @@ function hintText(h) {
       ? (h.value === 2 ? 'eine <b>große Mine (2)</b>' : h.value === 1 ? 'eine <b>kleine Mine (1)</b>' : 'eine <b>Mine</b>')
       : 'eine <b>Mine</b>';
   if (h.kind === 'retype') return `Falsch markiert: Hier liegt ${what}.`;
+  if (h.kind === 'type') return `Jetzt lässt sich zeigen: Hier liegt ${what}.`;
   return `Hier liegt sicher ${what}.`;
 }
 
@@ -772,7 +770,7 @@ function showHint(h, persistent) {
   if (!h) return;
   const el = G.cells[h.cell];
   el.classList.add('hint');
-  if (h.kind === 'mine' || h.kind === 'retype') el.classList.add('hint-mine');
+  if (h.kind === 'mine' || h.kind === 'retype' || h.kind === 'type') el.classList.add('hint-mine');
   // Nur die Beweis-Zahlen in der Nähe zeigen, sonst leuchtet das halbe Feld.
   const hx = h.cell % G.cols, hy = Math.floor(h.cell / G.cols);
   for (const r of h.reasons || []) {
@@ -898,7 +896,8 @@ function lose(i, how) {
       el.className = 'cell mine anim';
       el.style.setProperty('--d', d + 'ms');
       el.innerHTML = mineIcon(G.mode, b.values[j]);
-      if (G.flags[j]) el.classList.add('wrong');
+      // "?" war richtig (dort liegt ja eine Mine) – nur eine falsche Sorte gilt als Fehler.
+      if (G.flags[j] && G.flags[j] !== FLAG_ANY) el.classList.add('wrong');
     } else if (G.flags[j]) {
       el.classList.add('wrong');
     }

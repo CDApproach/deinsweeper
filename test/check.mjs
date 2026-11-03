@@ -6,7 +6,7 @@
 //  - der Generator ist reproduzierbar und eine aufgezeichnete Partie lässt sich
 //    nachspielen (so prüft der Server Einträge in die Weltrangliste)
 // Aufruf: node test/check.mjs [anzahlProKombination]
-import { MODES, DIFFICULTIES, Engine, generate, cascade, findHint, mulberry32, maskValue, boardForAttempt, replay, scoreGame } from '../js/core.js';
+import { MODES, DIFFICULTIES, Engine, generate, cascade, findHint, mulberry32, maskValue, boardForAttempt, replay, scoreGame, chordTargets, FLAG_ANY } from '../js/core.js';
 
 const N = Number(process.argv[2] || 20);
 let failures = 0;
@@ -60,10 +60,19 @@ for (const modeId of Object.keys(MODES)) {
           if (b.values[h.cell]) { fail(`${modeId}: Tipp 'sicher' war Mine`); break; }
           for (const c of cascade(b, revealed, h.cell)) if (b.values[c]) fail(`${modeId}: Kaskade traf Mine`);
           moves.push({ k: 'r', i: h.cell, t: steps * 900 });
-        } else if (h.kind === 'mine' || h.kind === 'retype') {
+        } else if (h.kind === 'mine' || h.kind === 'retype' || h.kind === 'type') {
           if (!b.values[h.cell]) { fail(`${modeId}: Tipp 'Mine' war sicher`); break; }
-          flags[h.cell] = h.value || b.values[h.cell];
+          if (h.value && h.value !== b.values[h.cell]) fail(`${modeId}: Tipp nennt falsche Sorte`);
+          // Sorte noch offen -> wie ein Mensch mit "?" markieren
+          flags[h.cell] = h.value || (MODES[modeId].values === 3 ? FLAG_ANY : 1);
           moves.push({ k: 'f', i: h.cell, v: flags[h.cell], t: steps * 900 });
+        }
+        // Mit korrekten (auch "?"-)Markierungen darf Tippen auf eine Zahl nie eine Mine aufdecken.
+        for (let i = 0; i < b.n; i++) {
+          if (!revealed[i]) continue;
+          for (const j of chordTargets(b, i, revealed, flags)) {
+            if (b.values[j]) { fail(`${modeId}/${diffId} seed ${seed}: Zahl antippen hätte Mine ${j} aufgedeckt`); break; }
+          }
         }
         if (++steps > 2000) { fail('Endlosschleife'); break; }
       }

@@ -45,6 +45,17 @@ export function mineIcon(mode, value) {
 
 // Markierung: Fähnchen; bei Schweren Minen mit 1/2, bei Magneten als Pol.
 export function flagIcon(mode, value) {
+  if (value === 3) {
+    // Mine bzw. Magnet, Sorte noch offen
+    const q = '<text x="12" y="16.3" font-size="12" font-weight="900" text-anchor="middle" fill="#0b1026" stroke="none" font-family="system-ui, sans-serif">?</text>';
+    if (mode === 'magnet') {
+      return svg(`<circle cx="12" cy="12" r="8.5" fill="#c9cfee" stroke="#fff" stroke-opacity=".6" stroke-width="1.4"/>${q}`, '0 0 24 24', 'class="ico"');
+    }
+    return svg(
+      `<path d="M6 21V3.5" stroke="#e8ecff"/><path d="M6 4c4-2.5 7 2.5 14 0v10c-7 2.5-10-2.5-14 0z" fill="#e3e7ff" stroke="#e3e7ff"/><text x="13.5" y="12.6" font-size="9.5" font-weight="900" text-anchor="middle" fill="#1a1203" stroke="none" font-family="system-ui, sans-serif">?</text>`,
+      '0 0 24 24', 'class="ico"'
+    );
+  }
   if (mode === 'magnet') {
     const c = value === 1 ? '#ff6b7f' : '#63b0ff';
     const sign = value === 1 ? '<path d="M12 8v8M8 12h8" stroke="#0b1026" stroke-width="2.6"/>' : '<path d="M8 12h8" stroke="#0b1026" stroke-width="2.6"/>';
